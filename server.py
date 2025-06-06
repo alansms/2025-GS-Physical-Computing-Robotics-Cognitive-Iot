@@ -7,13 +7,12 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 
 class SensorDataHandler(BaseHTTPRequestHandler):
     """Handler for sensor data requests"""
-
-    def __init__(self, output_dir, *args, **kwargs):
-        self.output_dir = output_dir
-        super().__init__(*args, **kwargs)
+    output_dir = "sensor_data"  # Default output directory
 
     def do_GET(self):
         """Return server ready status"""
+        client_address = self.client_address[0]
+        print(f"GET request from: {client_address}")
         self.send_response(200)
         self.end_headers()
         self.wfile.write(b"1")  # Always ready to receive data
@@ -21,10 +20,14 @@ class SensorDataHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         """Handle incoming sensor data"""
         try:
+            client_address = self.client_address[0]
             # Read and parse data
             content_length = int(self.headers["Content-Length"])
             post_data = self.rfile.read(content_length).decode("utf-8")
             sensor_data = json.loads(post_data)
+
+            print(f"\nRecebendo dados do ESP32 ({client_address}):")
+            print(f"X:{sensor_data['ax']:.6f} Y:{sensor_data['ay']:.6f} Z:{sensor_data['az']:.6f} | ACC_XY:{sensor_data['acceleration_xy']:.6f}")
 
             # Generate filename with timestamp
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -33,35 +36,36 @@ class SensorDataHandler(BaseHTTPRequestHandler):
             # Save data to CSV
             self._save_data_to_csv(sensor_data, filepath)
 
-            print(f"Data saved to {filepath}")
             self.send_response(204)  # Success, no content to return
+            print(f"Dados salvos em: {filepath}")
 
         except Exception as e:
-            print(f"Error processing data: {str(e)}")
+            print(f"Erro ao processar dados do {client_address}: {str(e)}")
             self.send_response(500)
 
         self.end_headers()
 
     def _save_data_to_csv(self, data, filepath):
         """Save sensor data to CSV file"""
-        with open(filepath, "w") as f:
-            num_samples = len(data["x"])
-            for i in range(num_samples):
-                f.write(f"{data['x'][i]},{data['y'][i]},{data['z'][i]}\n")
+        # Create directory if it doesn't exist
+        filepath.parent.mkdir(parents=True, exist_ok=True)
+
+        # Write headers if this is the first write
+        if not hasattr(self, 'headers_written'):
+            with open(filepath, "w") as f:
+                f.write("timestamp,ax,ay,az,acceleration_xy\n")
+            self.headers_written = True
+
+        # Append data
+        with open(filepath, "a") as f:
+            f.write(f"{data['timestamp']},{data['ax']},{data['ay']},{data['az']},{data['acceleration_xy']}\n")
 
 
 def create_server(output_dir, port):
     """Create and configure the HTTP server"""
-
-    # Ensure output directory exists
-    Path(output_dir).mkdir(parents=True, exist_ok=True)
-
-    # Create handler with output directory configuration
-    def handler(*args, **kwargs):
-        return SensorDataHandler(output_dir, *args, **kwargs)
-
-    # Create and return server
-    return HTTPServer(("", port), handler)
+    SensorDataHandler.output_dir = output_dir  # Set output directory as class variable
+    server_address = ('', port)
+    return HTTPServer(server_address, SensorDataHandler)
 
 
 def main():
@@ -76,7 +80,7 @@ def main():
         help="Output directory for sensor data (default: sensor_data)",
     )
     parser.add_argument(
-        "-p", "--port", type=int, default=4242, help="Server port (default: 4242)"
+        "-p", "--port", type=int, default=8080, help="Server port (default: 8080)"
     )
     args = parser.parse_args()
 
