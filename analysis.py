@@ -9,38 +9,48 @@ def prepare_dataset():
     try:
         dataset_dir = Path("datasets/ac")
 
+        # Configuração dos diretórios
+        NORMAL_OPS = ["silent_0_baseline"]
+        ANOMALY_OPS = ["medium_0", "high_0", "silent_1", "medium_1", "high_1"]
+
         # Carregar dados normais
         normal_data = []
-        normal_dir = dataset_dir / "normal"
-        if not normal_dir.exists():
-            raise FileNotFoundError(f"Diretório {normal_dir} não encontrado")
-
-        for file in normal_dir.glob("*.csv"):
-            try:
-                data = np.loadtxt(file, delimiter=",")
-                if data.shape[1] >= 2:  # Garantir que tem pelo menos 2 colunas
-                    normal_data.append(data[:, :2])  # Pegando apenas ax e ay
-            except Exception as e:
-                print(f"Erro ao carregar arquivo {file}: {str(e)}")
+        for op in NORMAL_OPS:
+            op_dir = dataset_dir / op
+            if not op_dir.exists():
+                print(f"Aviso: Diretório {op_dir} não encontrado")
                 continue
+
+            for file in op_dir.glob("*.csv"):
+                try:
+                    data = np.loadtxt(file, delimiter=",")
+                    if data.shape[1] >= 2:
+                        normal_data.append(data[:, :2])
+                except Exception as e:
+                    print(f"Aviso: Erro ao carregar arquivo {file}: {str(e)}")
+                    continue
 
         # Carregar dados de anomalia
         anomaly_data = []
-        anomaly_dir = dataset_dir / "anomalia"
-        if not anomaly_dir.exists():
-            raise FileNotFoundError(f"Diretório {anomaly_dir} não encontrado")
-
-        for file in anomaly_dir.glob("*.csv"):
-            try:
-                data = np.loadtxt(file, delimiter=",")
-                if data.shape[1] >= 2:
-                    anomaly_data.append(data[:, :2])
-            except Exception as e:
-                print(f"Erro ao carregar arquivo {file}: {str(e)}")
+        for op in ANOMALY_OPS:
+            op_dir = dataset_dir / op
+            if not op_dir.exists():
+                print(f"Aviso: Diretório {op_dir} não encontrado")
                 continue
 
-        if not normal_data or not anomaly_data:
-            raise ValueError("Nenhum dado válido encontrado nas pastas normal/anomalia")
+            for file in op_dir.glob("*.csv"):
+                try:
+                    data = np.loadtxt(file, delimiter=",")
+                    if data.shape[1] >= 2:
+                        anomaly_data.append(data[:, :2])
+                except Exception as e:
+                    print(f"Aviso: Erro ao carregar arquivo {file}: {str(e)}")
+                    continue
+
+        if not normal_data:
+            raise ValueError("Nenhum dado normal válido encontrado")
+        if not anomaly_data:
+            raise ValueError("Nenhum dado de anomalia válido encontrado")
 
         # Concatenar todos os dados
         X_normal = np.vstack(normal_data)
@@ -50,24 +60,24 @@ def prepare_dataset():
         y_normal = np.zeros(X_normal.shape[0])
         y_anomaly = np.ones(X_anomaly.shape[0])
 
-        # Combinar dados e labels
-        X = np.vstack([X_normal, X_anomaly])
-        y = np.hstack([y_normal, y_anomaly])
-
-        return X, y
+        return X_normal, X_anomaly, y_normal, y_anomaly
 
     except Exception as e:
-        print(f"Erro ao preparar dataset: {str(e)}")
+        print(f"Erro crítico no prepare_dataset: {str(e)}")
         raise
 
 def train_and_evaluate():
     """Treina o modelo e avalia sua performance"""
     try:
         # Preparar dataset
-        X, y = prepare_dataset()
+        X_normal, X_anomaly, y_normal, y_anomaly = prepare_dataset()
 
-        if X.shape[0] == 0:
+        if X_normal.shape[0] == 0 and X_anomaly.shape[0] == 0:
             raise ValueError("Dataset vazio")
+
+        # Concatenar dados normais e de anomalia para treinamento
+        X = np.vstack([X_normal, X_anomaly])
+        y = np.hstack([y_normal, y_anomaly])
 
         # Criar e treinar o modelo
         clf = EllipticEnvelope(contamination=0.1, random_state=42)

@@ -1,111 +1,82 @@
-# 2025-GS-Physical-Computing-Robotics-Cognitive-IoT  
-### Detecção de Tremores com IA Embarcada e Edge Computing
+# Sistema de Detecção de Anomalias com Edge AI
+### Edge Computing e Machine Learning para Detecção de Vibrações Anômalas
 
-Sistema de detecção de anomalias usando acelerômetro MPU6050 com ESP32, análise local e envio para backend em FastAPI, com frontend React para visualização gráfica. Projeto desenvolvido para a disciplina *PHYSICAL COMPUTING, ROBOTICS & COGNITIVE IOT* – FIAP 2025.
+Sistema inteligente para detecção de anomalias em tempo real utilizando Edge Computing e Machine Learning. O projeto combina sensores de precisão com processamento local e análise avançada de dados para identificar padrões anormais de vibração. Desenvolvido para a disciplina *PHYSICAL COMPUTING, ROBOTICS & COGNITIVE IOT* – FIAP 2025.
 
----
+🎥 [Assista à demonstração do projeto](https://youtu.be/OuGEmMAUXvc)
 
-## 📑 Sumário
+## 🚀 Principais Características
 
-- [🎥 Demonstração em Vídeo](#🎥-demonstração-em-vídeo)
-- [📦 Componentes Utilizados](#📦-componentes-utilizados)
-- [🧠 Funcionamento](#🧠-funcionamento)
-- [🔧 Configurações](#🔧-configurações)
-- [🚀 Execução](#🚀-execução)
-- [📘 Relatório](#📘-relatório)
-- [🛠️ Tecnologias](#🛠️-tecnologias)
-- [🔌 Esquema de Ligações](#🔌-esquema-de-ligações)
-- [💾 Código do Dispositivo](#💾-código-do-dispositivo)
-- [👥 Equipe](#👥-equipe)
-- [📝 Licença](#📝-licença)
+- Detecção em tempo real com Edge Computing
+- Machine Learning para identificação de padrões
+- Análise multi-dimensional de vibrações
+- Dashboard interativo para monitoramento
+- Sistema distribuído com processamento local e em nuvem
 
----
+![Carrossel GIF](https://raw.githubusercontent.com/…/img/carrossel.gif)
 
-## 🎥 Demonstração em Vídeo
+## 🛠️ Tecnologias e Componentes
 
-📽️ [Clique aqui para assistir](https://drive.google.com/file/d/1mZdYq0PmIcGKYq5ovM_R469sQ2BsSEwu/view?usp=sharing)  
-[![Demo](Captura-1.png)](https://drive.google.com/file/d/1mZdYq0PmIcGKYq5ovM_R469sQ2BsSEwu/view?usp=sharing)
+### Hardware
+- ESP32 (Processamento Edge)
+- MPU6050 (Acelerômetro 3-eixos + Giroscópio)
+- BMP085 (Sensor de pressão - complementar)
 
----
-
-## 📦 Componentes Utilizados
-
-- **ESP32** com Wi-Fi
-- **MPU6050** (Acelerômetro + Giroscópio)
-- **FastAPI** (Backend Python)
-- **React** (Frontend para gráficos)
-- **BMP085** (opcional – sensor de pressão)
-
----
+### Software
+- **Edge:** C++ (Arduino Framework)
+- **Backend:** Python FastAPI
+- **Frontend:** React.js com visualização em tempo real
+- **ML:** Algoritmos de detecção de anomalias (Mahalanobis Distance)
+- **Análise:** Bibliotecas NumPy e Pandas
 
 ## 🧠 Funcionamento
 
-1. O sensor coleta 200 amostras a 200Hz.
-2. Os dados são normalizados (aceleração em `g`).
-3. O ESP32 envia os dados para o backend via POST (JSON).
-4. O backend calcula: `a_total = sqrt(ax² + ay² + az²)`.
-5. Se `a_total` estiver fora de `[0.98, 1.01]`, é marcado como anomalia.
+1. **Coleta de Dados:**
+   - Taxa de amostragem: 200Hz
+   - Buffer de 200 amostras por ciclo
+   - Normalização em tempo real
 
----
+2. **Processamento Edge:**
+   - Pré-processamento local
+   - Cálculo de features dimensionais
+   - Detecção primária de anomalias
 
-## 🔧 Configurações
+3. **Análise Avançada:**
+   - Modelo Mahalanobis para detecção de outliers
+   - Análise multi-dimensional dos dados
+   - Sistema de pontuação de anomalias
 
-- **WiFi SSID**: SMS Tecnologia  
-- **Porta Backend**: `8005`  
-- **Taxa de Amostragem**: `200 Hz`  
-- **Detecção**: Threshold fixo  
-- **Linguagens**: Python (FastAPI), C++ (Arduino), JavaScript (React)
+## ⚙️ Configurações
 
----
+- **Rede:** Wi-Fi com conexão direta ao backend
+- **API:** Porta 8005 (configurável)
+- **Sensibilidade:** Ajustável via dashboard
+- **Armazenamento:** Local e em nuvem
 
 ## 🚀 Execução
 
-### Backend (FastAPI)
+### Backend
 ```bash
 uvicorn fastapi_server:app --port 8005 --reload
+```
 
+### Frontend
+```bash
+cd app-monitoramento
 npm install
 npm start
+```
 
-Dispositivo (ESP32)
+### Dispositivo
+- Carregar o código via Arduino IDE
+- Configurar WiFi e endpoint no arquivo de configuração
 
-Upload via Arduino IDE do código .ino.
+## 👥 Equipe
 
-⸻
+- André Rovai Andrade Xavier Junior – RM555848@fiap.com.br
+- Alan de Souza Maximiano da Silva – RM557088@fiap.com.br
+- Leonardo Zago Garcia Ferreira – RM558691@fiap.com.br
 
-📘 Relatório
+## 📝 Licença
 
-📄 Clique aqui para acessar o Relatório Final (PDF)
-
-🛠️ Tecnologias
-Camada
-Tecnologia
-Backend
-FastAPI (Python)
-Frontend
-React (JavaScript)
-Microcontrolador
-ESP32 (Arduino C++)
-Sensores
-MPU6050, BMP085
-
-🔌 Esquema de Ligações
-
-🔗 Visualizar no Wokwi
-
-💾 Código do Dispositivo
-
-O código do ESP32 está disponível em: esp32/anomaly_get_data_v2.ino
-
-⸻
-
-👥 Equipe
-	•	André Rovai Andrade Xavier Junior – RM555848@fiap.com.br
-	•	Alan de Souza Maximiano da Silva – RM557088@fiap.com.br
-	•	Leonardo Zago Garcia Ferreira – RM558691@fiap.com.br
-
-⸻
-
-📝 Licença
-
-Distribuído sob a licença MIT. Consulte o arquivo LICENSE para mais informações.
+Este projeto está sob a licença MIT. Consulte o arquivo LICENSE para mais detalhes.

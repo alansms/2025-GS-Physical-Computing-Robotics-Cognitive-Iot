@@ -199,6 +199,40 @@ async def get_capture_status():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.post("/train")
+async def train_model():
+    """Endpoint para treinar o modelo"""
+    try:
+        from analysis import train_and_evaluate
+
+        # Treinar modelo
+        model, cv_scores = train_and_evaluate()
+
+        # Gerar nome único para o modelo
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        model_filename = f"mahalanobis_model_{timestamp}.npz"
+        model_path = MODELS_DIR / model_filename
+
+        # Salvar o modelo
+        np.savez(model_path,
+                 covariance=model.covariance_,
+                 location=model.location_,
+                 scores=cv_scores)
+
+        return {
+            "status": "success",
+            "model_name": model_filename,
+            "cv_scores": cv_scores.tolist(),
+            "mean_score": cv_scores.mean(),
+            "std_score": cv_scores.std()
+        }
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro no treinamento: {str(e)}"
+        )
+
 @app.post("/train-model")
 async def train_model(model_name: str = Query(..., description="Nome do modelo a ser treinado")):
     """Treina o modelo com o nome especificado"""
