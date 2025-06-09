@@ -3,7 +3,7 @@
 
 Sistema inteligente para detecção de anomalias em tempo real utilizando Edge Computing e Machine Learning. O projeto combina sensores de precisão com processamento local e análise avançada de dados para identificar padrões anormais de vibração. Desenvolvido para a disciplina *PHYSICAL COMPUTING, ROBOTICS & COGNITIVE IOT* – FIAP 2025.
 
-🎥 [Assista à demonstração do projeto](https://youtu.be/OuGEmMAUXvc)
+🎥 [Assista à demonstração do projeto](https://youtu.be/ptv8GKg4S24)
 
 ## 🚀 Principais Características
 
